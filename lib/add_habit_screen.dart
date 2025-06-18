@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddHabitScreen extends StatefulWidget {
   const AddHabitScreen({super.key});
@@ -31,24 +34,20 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   Future<void> _loadHabits() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Hardcoded habits for demonstration
-      selectedHabitsMap = {
-        'Workout': 'FF5733', // Color in hex (e.g., Amber)
-        'Meditate': 'FF33A1',
-        'Read a Book': '33FFA1',
-        'Drink Water': '3380FF',
-        'Practice Gratitude': 'FFC300'
-      };
-      completedHabitsMap = {
-        'Wake Up Early': 'FF5733',
-        'Journal': 'DAF7A6'
-      };
+      // Load habits from both maps
+      selectedHabitsMap = Map<String, String>.from(
+          jsonDecode(prefs.getString('selectedHabitsMap') ?? '{}'));
+      completedHabitsMap = Map<String, String>.from(
+          jsonDecode(prefs.getString('completedHabitsMap') ?? '{}'));
     });
   }
 
   Future<void> _saveHabits() async {
-    // This function intentionally left empty as no saving is needed
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedHabitsMap', jsonEncode(selectedHabitsMap));
+    await prefs.setString('completedHabitsMap', jsonEncode(completedHabitsMap));
   }
 
   @override
@@ -125,6 +124,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                     _habitController.clear();
                     selectedColorName = 'Amber'; // Reset to default
                     selectedColor = _habitColors[selectedColorName]!;
+                    _saveHabits();
                   });
                 }
               },
@@ -158,6 +158,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           // Remove habit from both maps if it exists
                           selectedHabitsMap.remove(habitName);
                           completedHabitsMap.remove(habitName);
+                          _saveHabits();
                         });
                       },
                     ),
