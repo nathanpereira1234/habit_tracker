@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 Future<List<String>> fetchCountries() async {
   final response =
-      await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+      await http.get(Uri.parse('https://restcountries.com/v3.1/all?fields=name'));
 
   if (response.statusCode == 200) {
     List<dynamic> countriesJson = json.decode(response.body);
